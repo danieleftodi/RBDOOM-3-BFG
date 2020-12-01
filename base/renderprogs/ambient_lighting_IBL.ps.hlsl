@@ -37,8 +37,8 @@ uniform sampler2D samp2 : register(s2); // texture 2 is the per-surface baseColo
 uniform sampler2D samp3 : register(s3); // texture 3 is the BRDF LUT
 uniform sampler2D samp4 : register(s4); // texture 4 is SSAO
 
-uniform samplerCUBE	samp7 : register(s7); // texture 7 is the irradiance cube map
-uniform samplerCUBE	samp8 : register(s8); // texture 8 is the radiance cube map
+uniform sampler2D	samp7 : register(s7); // texture 7 is the irradiance cube map
+uniform sampler2D	samp8 : register(s8); // texture 8 is the radiance cube map
 
 struct PS_IN 
 {
@@ -58,6 +58,7 @@ struct PS_OUT
 	half4 color : COLOR;
 };
 // *INDENT-ON*
+
 
 void main( PS_IN fragment, out PS_OUT result )
 {
@@ -81,11 +82,12 @@ void main( PS_IN fragment, out PS_OUT result )
 	globalNormal.x = dot3( localNormal, fragment.texcoord4 );
 	globalNormal.y = dot3( localNormal, fragment.texcoord5 );
 	globalNormal.z = dot3( localNormal, fragment.texcoord6 );
+	globalNormal = normalize( globalNormal );
 
 	float3 globalEye = normalize( fragment.texcoord3.xyz );
 
 	float3 reflectionVector = globalNormal * dot3( globalEye, globalNormal );
-	reflectionVector = ( reflectionVector * 2.0f ) - globalEye;
+	reflectionVector = normalize( ( reflectionVector * 2.0f ) - globalEye );
 
 	half vDotN = saturate( dot3( globalEye, globalNormal ) );
 
@@ -150,7 +152,10 @@ void main( PS_IN fragment, out PS_OUT result )
 
 	// evaluate diffuse IBL
 
-	float3 irradiance = texCUBE( samp7, globalNormal ).rgb;
+	float2 normalizedOctCoord = octEncode( globalNormal );
+	float2 normalizedOctCoordZeroOne = ( normalizedOctCoord + float2( 1.0 ) ) * 0.5;
+
+	float3 irradiance = tex2D( samp7, normalizedOctCoordZeroOne ).rgb;
 	float3 diffuseLight = ( kD * irradiance * diffuseColor ) * ao * ( rpDiffuseModifier.xyz * 1.0 );
 
 	// evaluate specular IBL
@@ -159,7 +164,12 @@ void main( PS_IN fragment, out PS_OUT result )
 	const float MAX_REFLECTION_LOD = 10.0;
 	float mip = clamp( ( roughness * MAX_REFLECTION_LOD ), 0.0, MAX_REFLECTION_LOD );
 	//float mip = 0.0;
-	float3 radiance = textureLod( samp8, reflectionVector, mip ).rgb;
+
+	normalizedOctCoord = octEncode( reflectionVector );
+	normalizedOctCoordZeroOne = ( normalizedOctCoord + float2( 1.0 ) ) * 0.5;
+
+	float3 radiance = textureLod( samp8, normalizedOctCoordZeroOne, mip ).rgb;
+	//radiance = float3( 0.0 );
 
 	float2 envBRDF  = texture( samp3, float2( max( vDotN, 0.0 ), roughness ) ).rg;
 
