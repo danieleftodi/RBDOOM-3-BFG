@@ -768,8 +768,11 @@ remove them if not needed.
 #include <mutex> // for std::mutex
 #include <string.h>
 
-#if !defined(_WIN32)
+#if defined(__linux__)
 	#include <malloc.h> // for aligned_alloc()
+#elif defined(__APPLE__)
+	#include <malloc/malloc.h>
+#elif defined(_WIN32)
 #endif
 
 // Normal assert to check for programmer's errors, especially in Debug configuration.
@@ -2783,8 +2786,8 @@ public:
 	{
 		Add( '\n' );
 	}
-	void AddNumber( uint32_t num );
-	void AddNumber( uint64_t num );
+	void AddNumber32( uint32_t num );
+	void AddNumber64( uint64_t num );
 	void AddBool( bool b )
 	{
 		Add( b ? "true" : "false" );
@@ -2810,14 +2813,14 @@ void VmaStringBuilder::Add( const char* pStr )
 	}
 }
 
-void VmaStringBuilder::AddNumber( uint32_t num )
+void VmaStringBuilder::AddNumber32( uint32_t num )
 {
 	char buf[11];
 	VmaUint32ToStr( buf, sizeof( buf ), num );
 	Add( buf );
 }
 
-void VmaStringBuilder::AddNumber( uint64_t num )
+void VmaStringBuilder::AddNumber64( uint64_t num )
 {
 	char buf[21];
 	VmaUint64ToStr( buf, sizeof( buf ), num );
@@ -2919,27 +2922,27 @@ static const char* VMA_SUBALLOCATION_TYPE_NAMES[] =
 static void VmaPrintStatInfo( VmaStringBuilder& sb, const VmaStatInfo& stat )
 {
 	sb.Add( "{ \"Allocations\": " );
-	sb.AddNumber( stat.AllocationCount );
+	sb.AddNumber32( stat.AllocationCount );
 	sb.Add( ", \"Suballocations\": " );
-	sb.AddNumber( stat.SuballocationCount );
+	sb.AddNumber32( stat.SuballocationCount );
 	sb.Add( ", \"UnusedRanges\": " );
-	sb.AddNumber( stat.UnusedRangeCount );
+	sb.AddNumber32( stat.UnusedRangeCount );
 	sb.Add( ", \"UsedBytes\": " );
-	sb.AddNumber( stat.UsedBytes );
+	sb.AddNumber32( stat.UsedBytes );
 	sb.Add( ", \"UnusedBytes\": " );
-	sb.AddNumber( stat.UnusedBytes );
+	sb.AddNumber32( stat.UnusedBytes );
 	sb.Add( ", \"SuballocationSize\": { \"Min\": " );
-	sb.AddNumber( stat.SuballocationSizeMin );
+	sb.AddNumber32( stat.SuballocationSizeMin );
 	sb.Add( ", \"Avg\": " );
-	sb.AddNumber( stat.SuballocationSizeAvg );
+	sb.AddNumber32( stat.SuballocationSizeAvg );
 	sb.Add( ", \"Max\": " );
-	sb.AddNumber( stat.SuballocationSizeMax );
+	sb.AddNumber32( stat.SuballocationSizeMax );
 	sb.Add( " }, \"UnusedRangeSize\": { \"Min\": " );
-	sb.AddNumber( stat.UnusedRangeSizeMin );
+	sb.AddNumber32( stat.UnusedRangeSizeMin );
 	sb.Add( ", \"Avg\": " );
-	sb.AddNumber( stat.UnusedRangeSizeAvg );
+	sb.AddNumber32( stat.UnusedRangeSizeAvg );
 	sb.Add( ", \"Max\": " );
-	sb.AddNumber( stat.UnusedRangeSizeMax );
+	sb.AddNumber32( stat.UnusedRangeSizeMax );
 	sb.Add( " } }" );
 }
 
@@ -3464,13 +3467,13 @@ void VmaBlock::Free( const VmaAllocation allocation )
 void VmaBlock::PrintDetailedMap( class VmaStringBuilder& sb ) const
 {
 	sb.Add( "{\n\t\t\t\"Bytes\": " );
-	sb.AddNumber( m_Size );
+	sb.AddNumber32( m_Size );
 	sb.Add( ",\n\t\t\t\"FreeBytes\": " );
-	sb.AddNumber( m_SumFreeSize );
+	sb.AddNumber32( m_SumFreeSize );
 	sb.Add( ",\n\t\t\t\"Suballocations\": " );
-	sb.AddNumber( m_Suballocations.size() );
+	sb.AddNumber32( m_Suballocations.size() );
 	sb.Add( ",\n\t\t\t\"FreeSuballocations\": " );
-	sb.AddNumber( m_FreeCount );
+	sb.AddNumber32( m_FreeCount );
 	sb.Add( ",\n\t\t\t\"SuballocationList\": [" );
 
 	size_t i = 0;
@@ -3488,9 +3491,9 @@ void VmaBlock::PrintDetailedMap( class VmaStringBuilder& sb ) const
 		}
 		sb.AddString( VMA_SUBALLOCATION_TYPE_NAMES[suballocItem->type] );
 		sb.Add( ", \"Size\": " );
-		sb.AddNumber( suballocItem->size );
+		sb.AddNumber32( suballocItem->size );
 		sb.Add( ", \"Offset\": " );
-		sb.AddNumber( suballocItem->offset );
+		sb.AddNumber32( suballocItem->offset );
 		sb.Add( " }" );
 	}
 
@@ -4933,7 +4936,7 @@ void VmaAllocator_T::PrintDetailedMap( VmaStringBuilder& sb )
 					sb.Add( ",\n\"OwnAllocations\": {\n\t\"Type " );
 					ownAllocationsStarted = true;
 				}
-				sb.AddNumber( memTypeIndex );
+				sb.AddNumber32( memTypeIndex );
 				if( blockVectorType == VMA_BLOCK_VECTOR_TYPE_MAPPED )
 				{
 					sb.Add( " Mapped" );
@@ -4951,7 +4954,7 @@ void VmaAllocator_T::PrintDetailedMap( VmaStringBuilder& sb )
 					{
 						sb.Add( "\n\t\t{ \"Size\": " );
 					}
-					sb.AddNumber( hAlloc->GetSize() );
+					sb.AddNumber32( hAlloc->GetSize() );
 					sb.Add( ", \"Type\": " );
 					sb.AddString( VMA_SUBALLOCATION_TYPE_NAMES[hAlloc->GetSuballocationType()] );
 					sb.Add( " }" );
@@ -4984,7 +4987,7 @@ void VmaAllocator_T::PrintDetailedMap( VmaStringBuilder& sb )
 						sb.Add( ",\n\"Allocations\": {\n\t\"Type " );
 						allocationsStarted = true;
 					}
-					sb.AddNumber( memTypeIndex );
+					sb.AddNumber32( memTypeIndex );
 					if( blockVectorType == VMA_BLOCK_VECTOR_TYPE_MAPPED )
 					{
 						sb.Add( " Mapped" );
@@ -5105,9 +5108,9 @@ void vmaBuildStatsString(
 		for( uint32_t heapIndex = 0; heapIndex < allocator->GetMemoryHeapCount(); ++heapIndex )
 		{
 			sb.Add( ",\n\"Heap " );
-			sb.AddNumber( heapIndex );
+			sb.AddNumber32( heapIndex );
 			sb.Add( "\": {\n\t\"Size\": " );
-			sb.AddNumber( allocator->m_MemProps.memoryHeaps[heapIndex].size );
+			sb.AddNumber32( allocator->m_MemProps.memoryHeaps[heapIndex].size );
 			sb.Add( ",\n\t\"Flags\": " );
 			if( ( allocator->m_MemProps.memoryHeaps[heapIndex].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ) != 0 )
 			{
@@ -5128,7 +5131,7 @@ void vmaBuildStatsString(
 				if( allocator->m_MemProps.memoryTypes[typeIndex].heapIndex == heapIndex )
 				{
 					sb.Add( ",\n\t\"Type " );
-					sb.AddNumber( typeIndex );
+					sb.AddNumber32( typeIndex );
 					sb.Add( "\": {\n\t\t\"Flags\": \"" );
 					VkMemoryPropertyFlags flags = allocator->m_MemProps.memoryTypes[typeIndex].propertyFlags;
 					if( ( flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) != 0 )
