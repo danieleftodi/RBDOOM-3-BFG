@@ -854,6 +854,8 @@ void Sys_GrabMouseCursor( bool grabIt )
 	}
 #if defined(__linux__) && defined(USE_VULKAN)
 	VKimp_GrabInput( flags );
+#elif defined(__APPLE__) && defined(USE_VULKAN)
+	VKimp_GrabInput( flags );	
 #else
 	GLimp_GrabInput( flags );
 #endif
