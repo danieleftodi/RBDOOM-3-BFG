@@ -42,3 +42,5 @@ neo/.idea/
 neo/cmake-build-*/
 .DS_Store
 base
+
+neo/idlib/precompiled.h*.gch.tmp
