@@ -105,7 +105,7 @@ bool GLimp_Init( glimpParms_t parms )
 	return true;
 #endif
 
-	common->Printf( "Initializing OpenGL subsystem\n" );
+	common->Printf( "----- Initializing OpenGL subsystem -----\n" );
 
 	GLimp_PreInit(); // DG: make sure SDL is initialized
 
@@ -235,6 +235,7 @@ bool GLimp_Init( glimpParms_t parms )
 		// RB begin
 		if( r_useOpenGL32.GetInteger() > 0 )
 		{
+			common->Printf( "DEBUG :: SLD<2 :: r_useOpenGL32.GetInteger() > 0\n" );
 			glConfig.driverType = GLDRV_OPENGL32_COMPATIBILITY_PROFILE;
 
 			SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
@@ -242,12 +243,14 @@ bool GLimp_Init( glimpParms_t parms )
 
 			if( r_debugContext.GetBool() )
 			{
+				common->Printf( "DEBUG :: SLD<2 :: r_debugContext.GetBool()\n" );
 				SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG );
 			}
 		}
 
 		if( r_useOpenGL32.GetInteger() > 1 )
 		{
+			common->Printf( "DEBUG :: SLD<2 :: r_useOpenGL32.GetInteger() > 1\n" );
 			glConfig.driverType = GLDRV_OPENGL32_CORE_PROFILE;
 
 			SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
@@ -276,7 +279,7 @@ bool GLimp_Init( glimpParms_t parms )
 		 * the mouse cursor.
 		 */
 
-
+		common->Printf( "DEBUG :: SLD<2 :: window = SDL_CreateWindow()\n" );
 		window = SDL_CreateWindow( GAME_NAME,
 								   windowPos,
 								   windowPos,

@@ -217,6 +217,7 @@ idSessionLocalWin::Initialize
 */
 void idSessionLocalWin::Initialize()
 {
+	Sys_Printf( "DEBUG :: idSessionLocalWin::Initialize()\n" );
 	idSessionLocal::Initialize();
 
 	// The shipping path doesn't load title storage

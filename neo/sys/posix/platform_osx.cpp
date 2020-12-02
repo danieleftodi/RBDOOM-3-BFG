@@ -448,11 +448,13 @@ main
 */
 int main( int argc, const char** argv )
 {
+	Sys_Printf( "DEBUG :: MAIN :: STARTING DOOM3 BFG\n" );
 	// DG: needed for Sys_ReLaunch()
 	cmdargc = argc;
 	cmdargv = argv;
 	// DG end
 
+	Sys_Printf( "DEBUG :: MAIN :: Posix_EarlyInit()\n" );
 	Posix_EarlyInit( );
 
 	if( argc > 1 )
@@ -464,8 +466,10 @@ int main( int argc, const char** argv )
 		common->Init( 0, NULL, NULL );
 	}
 
+	Sys_Printf( "DEBUG :: MAIN :: Posix_LateInit()\n" );
 	Posix_LateInit( );
 
+	Sys_Printf( "DEBUG :: MAIN :: while(1)common->Frame()\n" );
 	while( 1 )
 	{
 		common->Frame();

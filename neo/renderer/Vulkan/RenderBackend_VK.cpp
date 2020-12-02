@@ -292,6 +292,10 @@ static void CreateVulkanInstance()
 	auto extensions = get_required_extensions( sdlInstanceExtensions, enableLayers );
 	createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
 	createInfo.ppEnabledExtensionNames = extensions.data();
+#elif defined(__APPLE__)
+	auto extensions = get_required_extensions( sdlInstanceExtensions, enableLayers );
+	createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
+	createInfo.ppEnabledExtensionNames = extensions.data();	
 #else
 	createInfo.enabledExtensionCount = vkcontext.instanceExtensions.Num();
 	createInfo.ppEnabledExtensionNames = vkcontext.instanceExtensions.Ptr();
@@ -447,6 +451,11 @@ static void CreateSurface()
 	{
 		idLib::FatalError( "Error while creating Vulkan surface: %s", SDL_GetError() );
 	}
+#elif defined(__APPLE__)
+	if( !SDL_Vulkan_CreateSurface( vkcontext.sdlWindow, vkcontext.instance, &vkcontext.surface ) )
+	{
+		idLib::FatalError( "Error while creating Vulkan surface: %s", SDL_GetError() );
+	}	
 #else
 	VkXcbSurfaceCreateInfoKHR createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
@@ -848,6 +857,11 @@ static VkExtent2D ChooseSurfaceExtent( VkSurfaceCapabilitiesKHR& caps )
 
 	width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
 	height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );
+#elif defined(__APPLE__)
+	SDL_Vulkan_GetDrawableSize( vkcontext.sdlWindow, &width, &height );
+
+	width = idMath::ClampInt( caps.minImageExtent.width, caps.maxImageExtent.width, width );
+	height = idMath::ClampInt( caps.minImageExtent.height, caps.maxImageExtent.height, height );	
 #endif
 
 	if( caps.currentExtent.width == -1 )
@@ -1133,6 +1147,12 @@ static void CreateRenderTargets()
 
 	depthOptions.width = extent.width;
 	depthOptions.height = extent.height;
+#elif defined(__APPLE__)
+	gpuInfo_t& gpu = *vkcontext.gpu;
+	VkExtent2D extent = ChooseSurfaceExtent( gpu.surfaceCaps );
+
+	depthOptions.width = extent.width;
+	depthOptions.height = extent.height;	
 #else
 	depthOptions.width = renderSystem->GetWidth();
 	depthOptions.height = renderSystem->GetHeight();
@@ -1455,6 +1475,8 @@ void idRenderBackend::Init()
 	// DG: make sure SDL has setup video so getting supported modes in R_SetNewMode() works
 #if defined(__linux__) && defined(USE_VULKAN)
 	VKimp_PreInit();
+#elif defined(__APPLE__) && defined(USE_VULKAN)
+	VKimp_PreInit();	
 #else
 	GLimp_PreInit();
 #endif
@@ -1640,6 +1662,8 @@ void idRenderBackend::Shutdown()
 	// destroy main window
 #if defined(__linux__) && defined(USE_VULKAN)
 	VKimp_Shutdown();
+#elif defined(__APPLE__) && defined(USE_VULKAN)
+	VKimp_Shutdown();	
 #else
 	GLimp_Shutdown();
 #endif

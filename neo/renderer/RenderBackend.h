@@ -116,6 +116,9 @@ void RB_SetVertexColorParms( stageVertexColor_t svc );
 #if defined(__linux__)
 	#include <SDL.h>
 	#include <SDL_vulkan.h>
+#elif defined(__APPLE__)
+	#include <SDL.h>
+	#include <SDL_vulkan.h>
 #endif
 
 struct gpuInfo_t
@@ -135,6 +138,9 @@ struct vulkanContext_t
 	// Eric: If on linux, use this to pass SDL_Window pointer to the SDL_Vulkan_* methods not in sdl_vkimp.cpp file.
 #if defined(__linux__)
 	SDL_Window*						sdlWindow = nullptr;
+#elif defined(__APPLE__)	
+	SDL_Window*						sdlWindow = nullptr;
+#else
 #endif
 	uint64							frameCounter;
 	uint32							frameParity;

@@ -984,6 +984,7 @@ Posix_EarlyInit
 */
 void Posix_EarlyInit()
 {
+	Sys_Printf( "DEBUG :: Posix_EarlyInit()\n" );
 	//memset( &asyncThread, 0, sizeof( asyncThread ) );
 
 	exit_spawn[0] = '\0';
@@ -1002,6 +1003,7 @@ Posix_LateInit
 */
 void Posix_LateInit()
 {
+	Sys_Printf( "DEBUG :: Posix_LateInit()\n" );
 	Posix_InitConsoleInput();
 	com_pid.SetInteger( getpid() );
 	common->Printf( "pid: %d\n", com_pid.GetInteger() );

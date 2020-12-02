@@ -131,6 +131,7 @@ Posix_InitSigs
 */
 void Posix_InitSigs( )
 {
+	Sys_Printf( "DEBUG :: Posix_InitSigs()\n" );
 	struct sigaction action;
 	int i;
 

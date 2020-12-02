@@ -750,6 +750,7 @@ idCinematicLocal::InitFromFile
 */
 bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 {
+	idLib::Printf( "\nDEBUG :: idCinematicLocal::InitFromFile :: BEGIN\n" );
 	unsigned short RoQID;
 
 	Close();
@@ -781,15 +782,17 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 	if( !iFile )
 	{
 #if defined(USE_FFMPEG)
+		Sys_Printf( "DEBUG :: USE_FFMPEG\n" );
 		//idLib::Warning( "Original Doom 3 RoQ Cinematic not found: '%s'\n", fileName.c_str() );
 		idStr temp = fileName.StripFileExtension() + ".bik";
 		animationLength = 0;
 		hasFrame = false;
 		RoQShutdown();
 		fileName = temp;
-		//idLib::Warning( "New filename: '%s'\n", fileName.c_str() );
+		Sys_Printf(  "DEBUG :: USE_FFMPEG :: New filename: '%s'\n", fileName.c_str() );
 		return InitFromFFMPEGFile( fileName.c_str(), amilooping );
 #elif defined(USE_BINKDEC)
+		Sys_Printf(  "DEBUG :: USE_BINKDEC\n" );
 		idStr temp = fileName.StripFileExtension() + ".bik";
 		animationLength = 0;
 		RoQShutdown();
@@ -797,6 +800,7 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 		//idLib::Warning( "New filename: '%s'\n", fileName.c_str() );
 		return InitFromBinkDecFile( fileName.c_str(), amilooping );
 #else
+		Sys_Printf(  "DEBUG :: USE_FFMPEG|USE_BINKDEC :: FAILED\n" );
 		animationLength = 0;
 		return false;
 #endif
@@ -813,6 +817,7 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 	startTime = 0;	//Sys_Milliseconds();
 	buf = NULL;
 
+	idLib::Printf( "DEBUG :: iFile->Read\n" );
 	iFile->Read( file, 16 );
 
 	RoQID = ( unsigned short )( file[0] ) + ( unsigned short )( file[1] ) * 256;
@@ -823,6 +828,7 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 		frameRate = 1000.0f / 32.0f;
 	}
 
+	idLib::Printf( "DEBUG :: RoQID == ROQ_FILE\n" );
 	if( RoQID == ROQ_FILE )
 	{
 		RoQ_init();
@@ -832,6 +838,7 @@ bool idCinematicLocal::InitFromFile( const char* qpath, bool amilooping )
 		return true;
 	}
 
+	idLib::Printf( "DEBUG :: idCinematicLocal::InitFromFile :: END :: RoQShutdown();\n" );
 	RoQShutdown();
 	return false;
 }
@@ -1167,6 +1174,7 @@ cinData_t idCinematicLocal::ImageForTimeFFMPEG( int thisTime )
 #ifdef USE_BINKDEC
 cinData_t idCinematicLocal::ImageForTimeBinkDec( int thisTime )
 {
+	//Sys_Printf( "DEBUG :: idCinematicLocal::ImageForTimeBinkDec\n" );
 	cinData_t	cinData = {0};
 
 	if( thisTime <= 0 )
