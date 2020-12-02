@@ -898,7 +898,7 @@ void R_WriteEXR( const char* filename, const void* rgba16f, int channelsPerPixel
 {
 	const unsigned ww = width - 1;
 	const unsigned hh = height - 1;
-	const unsigned char kHeader[] =
+	const unsigned int kHeader[] =
 	{
 		0x76, 0x2f, 0x31, 0x01, // magic
 		2, 0, 0, 0, // version, scanline
